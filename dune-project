@@ -1,4 +1,4 @@
-(lang dune 2.0)
+(lang dune 3.6)
 (name telegraml)
 (implicit_transitive_deps false)
 
@@ -13,7 +13,7 @@
  (documentation https://github.com/nv-vn/telegraml)
  (depends
    alcotest
-   batteries
+   core
    cohttp
    cohttp-lwt
    cohttp-lwt-unix

@@ -1,3 +1,6 @@
+[@@@ocaml.warning "-67"]
+
+
 (** Specifies the API used for creating Telegram bots, defined {{:https://core.telegram.org/bots/api} here.} *)
 
 (** An exception thrown if some rules specified in the API are invalidated by incorrectly formatted data of some type *)
@@ -1385,4 +1388,4 @@ module type TELEGRAM_BOT = sig
 end
 
 (** Generate a bot's interface to allow for direct calls to functions *)
-module Mk : functor (B : BOT) -> TELEGRAM_BOT
+module Mk : functor (B : BOT) -> TELEGRAM_BOT 

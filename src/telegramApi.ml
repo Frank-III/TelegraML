@@ -1,3 +1,4 @@
+[@@@ocaml.warning "-16"]
 open TelegramUtil
 (*open Yojson.Safe*)
 
@@ -269,11 +270,11 @@ module PhotoSize = struct
                        ("disable_notification", string_of_bool disable_notification)] +? ("caption", caption)
                                                                                       +? ("reply_to_message_id", string_of_int <$> reply_to_message_id)
                                                                                       +? ("reply_markup", Yojson.Safe.to_string <$> (ReplyMarkup.prepare <$> reply_markup))) in
-        let open Batteries.String in
+        let open Core.String in
         let mime =
-          if ends_with photo ".jpg" || ends_with photo ".jpeg" then "image/jpeg" else
-          if ends_with photo ".png" then "image/png" else
-          if ends_with photo ".gif" then "image/gif" else "text/plain" in
+          if is_suffix photo ~suffix:".jpg" || is_suffix photo ~suffix:".jpeg" then "image/jpeg" else
+          if is_suffix photo ~suffix:".png" then "image/png" else
+          if is_suffix photo ~suffix:".gif" then "image/gif" else "text/plain" in
         InputFile.multipart_body fields ("photo", photo, mime)
   end
 end
@@ -493,12 +494,12 @@ module Video = struct
                                                                                      +? ("caption", caption)
                                                                                      +? ("reply_to_message_id", string_of_int <$> reply_to_message_id)
                                                                                      +? ("reply_markup", Yojson.Safe.to_string <$> (ReplyMarkup.prepare <$> reply_markup)) in
-        let open Batteries.String in
+        let open Core.String in
         let mime =
-          if ends_with video ".mp4" then "video/mp4" else
-          if ends_with video ".mov" then "video/quicktime" else
-          if ends_with video ".avi" then "video/x-msvideo" else
-          if ends_with video ".webm" then "video/webm" else "text/plain" in
+          if is_suffix video ~suffix:".mp4" then "video/mp4" else
+          if is_suffix video ~suffix:".mov" then "video/quicktime" else
+          if is_suffix video ~suffix:".avi" then "video/x-msvideo" else
+          if is_suffix video ~suffix:".webm" then "video/webm" else "text/plain" in
         InputFile.multipart_body fields ("video", video, mime)
   end
 end
@@ -1485,7 +1486,6 @@ end
 module Command = struct
   open Update
   open Message
-  open Batteries.String
 
   type action =
     | Nothing
@@ -1537,16 +1537,18 @@ module Command = struct
   }
 
   let is_command = function
-    | Message (_, {text = Some txt; _}) when starts_with txt "/" -> true
+    | Message (_, {text = Some txt; _}) when Core.String.is_prefix txt ~prefix:"/" -> true
     | _ -> false
 
-  let rec read_command username msg cmds = match msg with
+  let rec read_command username msg cmds =
+    let open Core.String in
+     match msg with
     | {text = Some txt; _} -> begin
         let cmp str cmd =
-          match split_on_string str ~by:" " with
+          match split str ~on:' ' with
           | [] -> false
           | command::_ -> begin
-              match username, split_on_string command ~by:"@" with
+              match username, split command ~on:'@' with
               | _, [] -> false
               | Some username, base::bot::_ -> base = cmd && bot = username
               | _, base::_ -> base = cmd (* If no set prefix OR if no @postfix on the command itself *)
@@ -1562,7 +1564,7 @@ module Command = struct
     | Message (_, msg) -> read_command username msg
     | _ -> fun _ -> Lwt.return Nothing
 
-  let tokenize msg = List.tl @@ split_on_string msg ~by:" "
+  let tokenize msg = List.tl @@ Core.String.split msg ~on:' '
 
   let make_helper = function
     | {name; description; _} -> "/" ^ name ^ " - " ^ description

@@ -13,3 +13,6 @@ _build/
 
 # generated documentation
 *.docdir
+
+.envrc
+.direnv/

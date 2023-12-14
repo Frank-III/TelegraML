@@ -1,3 +1,5 @@
+[@@@ocaml.warning "-16-34"]
+
 open TelegramApi.Command
 
 (* Action combinators *)
